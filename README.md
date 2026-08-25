@@ -1,12 +1,12 @@
 # Del Bajo Real Estate — propuesta web
 
-Landing estática de presentación para Del Bajo Real Estate.
+Landing editorial de presentación para Del Bajo Real Estate.
 
 ## Contenido
 
-- `index.html`: estructura y copy de la landing.
-- `styles.css`: sistema visual responsive.
-- `script.js`: navegación móvil, animaciones de entrada y barra de progreso.
+- `index.html`: estructura y narrativa de la landing.
+- `styles.css`: sistema visual responsive y motion cinematográfico.
+- `script.js`: navegación móvil, reveals, cursor reactivo y profundidad del hero.
 
 ## Publicación
 

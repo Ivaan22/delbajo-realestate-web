@@ -1,40 +1,75 @@
+const body = document.body;
 const header = document.querySelector('[data-header]');
-const menuButton = document.querySelector('.menu-toggle');
 const nav = document.querySelector('#site-nav');
-const progress = document.querySelector('.scroll-progress span');
-const year = document.querySelector('#current-year');
+const menu = document.querySelector('.menu-toggle');
+const progress = document.querySelector('.scroll-line span');
+const hero = document.querySelector('.hero');
+const pointer = document.querySelector('.pointer');
 
-if (year) year.textContent = new Date().getFullYear();
-
-const updateScrollState = () => {
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-  const scrollPercent = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-  progress.style.transform = `scaleX(${scrollPercent})`;
-  header.classList.toggle('scrolled', window.scrollY > 32);
+const updateScroll = () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+  header.classList.toggle('scrolled', window.scrollY > 42);
 };
 
-window.addEventListener('scroll', updateScrollState, { passive: true });
-updateScrollState();
+window.addEventListener('scroll', updateScroll, { passive: true });
+updateScroll();
 
-menuButton?.addEventListener('click', () => {
-  const isOpen = nav.classList.toggle('is-open');
-  menuButton.setAttribute('aria-expanded', String(isOpen));
+menu?.addEventListener('click', () => {
+  const open = nav.classList.toggle('is-open');
+  menu.setAttribute('aria-expanded', String(open));
 });
 
-nav?.querySelectorAll('a').forEach((link) => {
-  link.addEventListener('click', () => {
-    nav.classList.remove('is-open');
-    menuButton?.setAttribute('aria-expanded', 'false');
-  });
-});
+nav?.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
+  nav.classList.remove('is-open');
+  menu?.setAttribute('aria-expanded', 'false');
+}));
 
-const observer = new IntersectionObserver((entries) => {
+const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (entry.isIntersecting) {
       entry.target.classList.add('is-visible');
-      observer.unobserve(entry.target);
+      revealObserver.unobserve(entry.target);
     }
   });
-}, { threshold: 0.12 });
+}, { threshold: 0.1 });
 
-document.querySelectorAll('.reveal').forEach((element) => observer.observe(element));
+document.querySelectorAll('.reveal').forEach((element) => revealObserver.observe(element));
+
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  body.classList.add('has-pointer');
+  let pointerX = 0;
+  let pointerY = 0;
+  let frame = null;
+
+  window.addEventListener('pointermove', (event) => {
+    pointerX = event.clientX;
+    pointerY = event.clientY;
+    if (!frame) {
+      frame = requestAnimationFrame(() => {
+        pointer.style.left = `${pointerX}px`;
+        pointer.style.top = `${pointerY}px`;
+        frame = null;
+      });
+    }
+  }, { passive: true });
+
+  hero?.addEventListener('pointermove', (event) => {
+    const rect = hero.getBoundingClientRect();
+    hero.style.setProperty('--mouse-x', ((event.clientX - rect.left) / rect.width * 2 - 1).toFixed(3));
+    hero.style.setProperty('--mouse-y', ((event.clientY - rect.top) / rect.height * 2 - 1).toFixed(3));
+  }, { passive: true });
+
+  hero?.addEventListener('pointerleave', () => {
+    hero.style.setProperty('--mouse-x', '0');
+    hero.style.setProperty('--mouse-y', '0');
+  });
+
+  document.querySelectorAll('[data-cursor]').forEach((element) => {
+    element.addEventListener('pointerenter', () => {
+      pointer.classList.add('is-label');
+      pointer.querySelector('span').textContent = element.dataset.cursor;
+    });
+    element.addEventListener('pointerleave', () => pointer.classList.remove('is-label'));
+  });
+}
